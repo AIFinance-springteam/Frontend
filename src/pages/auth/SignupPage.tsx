@@ -7,7 +7,10 @@ function SignupPage() {
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-4">
-      <SignupForm onBackClick={() => navigate('/login')} />
+      <SignupForm
+        onBackClick={() => navigate('/login')}
+        onSignupSuccess={() => navigate('/login')}
+      />
     </div>
   )
 }

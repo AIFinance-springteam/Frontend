@@ -1,24 +1,50 @@
 import { useState, type FormEvent } from 'react'
+import { httpClient } from '../../shared/api/httpClient'
+import { tokenStorage } from '../../shared/api/tokenStorage'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-interface LoginFormProps {
-  onSignupClick: () => void
+interface LoginResult {
+  accessToken: string
+  userId: number
+  nickname: string
 }
 
-function LoginForm({ onSignupClick }: LoginFormProps) {
+interface LoginFormProps {
+  onSignupClick: () => void
+  onLoginSuccess: () => void
+}
+
+function LoginForm({ onSignupClick, onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
 
   const emailError = submitted && !EMAIL_RE.test(email)
   const passwordError = submitted && password.length === 0
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setSubmitted(true)
+    setServerError(null)
     if (!EMAIL_RE.test(email) || password.length === 0) return
-    // TODO: 로그인 API 연동
+
+    setIsSubmitting(true)
+    try {
+      const response = await httpClient.post<LoginResult>('/api/v1/auth/login', {
+        email,
+        password,
+      })
+      tokenStorage.set(response.data.accessToken)
+      onLoginSuccess()
+    } catch (err) {
+      const message = (err as { message?: string })?.message
+      setServerError(message ?? '로그인에 실패했습니다')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -62,9 +88,11 @@ function LoginForm({ onSignupClick }: LoginFormProps) {
         {passwordError && <p className="auth-error">비밀번호를 입력해주세요</p>}
       </div>
 
+      {serverError && <p className="auth-error">{serverError}</p>}
+
       <div className="auth-actions">
-        <button type="submit" className="auth-button auth-button--primary">
-          로그인
+        <button type="submit" className="auth-button auth-button--primary" disabled={isSubmitting}>
+          {isSubmitting ? '로그인 중…' : '로그인'}
         </button>
         <button
           type="button"
