@@ -1,0 +1,257 @@
+.trip-page {
+  width: 100%;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.trip-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.trip-meta__avatars {
+  display: flex;
+}
+
+.trip-meta__avatars .avatar {
+  margin-left: -6px;
+}
+
+.trip-meta__avatars .avatar:first-child {
+  margin-left: 0;
+}
+
+.trip-meta__dates {
+  margin-left: 8px;
+  font-size: 10px;
+  color: #8a8a8a;
+}
+
+.balance-card {
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  padding: 18px 17px;
+}
+
+.balance-card__label {
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  color: #8a8a8a;
+}
+
+.balance-card__amount {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 8px;
+}
+
+.balance-card__hint {
+  font-size: 12px;
+  color: #8a8a8a;
+  margin-top: 6px;
+}
+
+.balance-card__divider {
+  height: 1px;
+  background: #c9c9c9;
+  margin: 16px 0;
+}
+
+.balance-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #8a8a8a;
+}
+
+.balance-card__row + .balance-card__row {
+  margin-top: 12px;
+}
+
+.balance-card__row-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+  padding: 13px 13px;
+}
+
+.total-row__label {
+  font-size: 11px;
+  color: #8a8a8a;
+}
+
+.total-row__value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.alert-card {
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  background: #ededed;
+  padding: 13px;
+}
+
+.alert-card__title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.alert-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 0;
+  width: 100%;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.alert-card__row-label {
+  font-size: 11px;
+  color: #1a1a1a;
+}
+
+.alert-card__row-count {
+  font-size: 11px;
+  color: #1a1a1a;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  color: #8a8a8a;
+}
+
+.receipt-list {
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.receipt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 13px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #c9c9c9;
+  width: 100%;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.receipt-row:last-child {
+  border-bottom: none;
+}
+
+.receipt-row__merchant {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.receipt-row__sub {
+  font-size: 10px;
+  color: #8a8a8a;
+  margin-top: 3px;
+}
+
+.receipt-row__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.receipt-row__amount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.status-pill {
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #c9c9c9;
+  color: #8a8a8a;
+}
+
+.status-pill--done {
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+
+.trip-card {
+  border: 1px solid #1a1a1a;
+  border-radius: 10px;
+  padding: 16px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+}
+
+.trip-card__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.trip-card__dates {
+  font-size: 11px;
+  color: #8a8a8a;
+  margin-top: 6px;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #c9c9c9;
+}
+
+.member-row:last-child {
+  border-bottom: none;
+}
+
+.member-row__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.member-row__name {
+  font-size: 12px;
+  color: #1a1a1a;
+}

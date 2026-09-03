@@ -1,0 +1,78 @@
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #1a1a1a;
+  color: #1a1a1a;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar--sm {
+  width: 20px;
+  height: 20px;
+  font-size: 8px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  border: 1px solid #1a1a1a;
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+.pill--outline {
+  background: transparent;
+  color: #8a8a8a;
+  border-color: #c9c9c9;
+}
+
+.btn {
+  width: 100%;
+  height: 42px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-primary {
+  background: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #1a1a1a;
+}
+
+.btn-primary:disabled {
+  background: #ffffff;
+  color: #c9c9c9;
+  border-color: #c9c9c9;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid #1a1a1a;
+}
+
+.btn-danger {
+  background: #ffffff;
+  color: #b5402f;
+  border: 1px solid #b5402f;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
