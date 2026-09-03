@@ -1,5 +1,10 @@
-node_modules
-dist
+node_modules/
+dist/
+.vscode/
+
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+
+*.local
+.DS_Store
