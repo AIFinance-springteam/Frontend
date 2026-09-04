@@ -1,16 +1,14 @@
+import type {
+  AnalysisStatus,
+  DuplicateStatus,
+  ReceiptItem,
+} from '../features/receipt/types/receipt'
+
 export interface Member {
   id: string
   name: string
   initial: string
   isOwner: boolean
-}
-
-export interface ReceiptItem {
-  id: string
-  name: string
-  quantity: number
-  amount: number
-  uncertain?: boolean
 }
 
 export interface Receipt {
@@ -22,6 +20,9 @@ export interface Receipt {
   totalAmount: number
   items: ReceiptItem[]
   assigned: boolean
+  analysisStatus: AnalysisStatus
+  duplicateStatus: DuplicateStatus
+  imageUrl: string | null
 }
 
 export interface Trip {
@@ -71,6 +72,9 @@ export const receipts: Receipt[] = [
     totalAmount: 180000,
     items: [],
     assigned: true,
+    analysisStatus: 'SUCCESS',
+    duplicateStatus: 'CLEAR',
+    imageUrl: null,
   },
   {
     id: '11',
@@ -81,6 +85,9 @@ export const receipts: Receipt[] = [
     totalAmount: 92000,
     items: [],
     assigned: true,
+    analysisStatus: 'SUCCESS',
+    duplicateStatus: 'CLEAR',
+    imageUrl: null,
   },
   {
     id: '12',
@@ -90,12 +97,15 @@ export const receipts: Receipt[] = [
     paidAt: '8월 1일 19:45',
     totalAmount: 38000,
     items: [
-      { id: 'i1', name: '생수 500ml', quantity: 4, amount: 4000 },
-      { id: 'i2', name: '포카칩', quantity: 2, amount: 6000 },
-      { id: 'i3', name: '선크림 SPF50', quantity: 1, amount: 18000, uncertain: true },
-      { id: 'i4', name: '보조배터리', quantity: 1, amount: 10000 },
+      { id: 'i1', name: '생수 500ml', quantity: 4, amount: 4000, confidence: 'HIGH' },
+      { id: 'i2', name: '포카칩', quantity: 2, amount: 6000, confidence: 'HIGH' },
+      { id: 'i3', name: '선크림 SPF50', quantity: 1, amount: 18000, confidence: 'LOW' },
+      { id: 'i4', name: '보조배터리', quantity: 1, amount: 10000, confidence: 'HIGH' },
     ],
     assigned: false,
+    analysisStatus: 'SUCCESS',
+    duplicateStatus: 'PENDING',
+    imageUrl: null,
   },
 ]
 

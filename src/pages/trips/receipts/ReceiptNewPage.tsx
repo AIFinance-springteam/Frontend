@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { routePaths } from '../../../app/routes/routePaths'
 import MobileScreen from '../../../components/layout/MobileScreen'
 import '../../../components/layout/screen-kit.css'
 import './receipt.css'
@@ -25,7 +26,7 @@ function ReceiptNewPage() {
       if (current >= STEPS.length) {
         window.clearInterval(timer)
         window.setTimeout(() => {
-          navigate(`/trips/${tripId}/receipts/12`)
+          navigate(routePaths.receiptDetail(tripId ?? '', '12'))
         }, 400)
       }
     }, 700)

@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
+import { routePaths } from '../../app/routes/routePaths'
 import MobileScreen from '../../components/layout/MobileScreen'
 import '../../components/layout/screen-kit.css'
 import './trip.css'
@@ -120,7 +121,7 @@ function TripDetailPage() {
                   key={receipt.id}
                   type="button"
                   className="receipt-row"
-                  onClick={() => navigate(`/trips/${trip.id}/receipts/${receipt.id}`)}
+                  onClick={() => navigate(routePaths.receiptDetail(trip.id, receipt.id))}
                 >
                   <span>
                     <span className="receipt-row__merchant">{receipt.merchant}</span>
