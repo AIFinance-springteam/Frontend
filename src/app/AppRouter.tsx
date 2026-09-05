@@ -5,6 +5,7 @@ import { tokenStorage } from '../shared/api/tokenStorage'
 import { ReceiptSplitRoute } from './routes/ReceiptSplitRoute'
 import { routePaths } from './routes/routePaths'
 import { TripHomeRoute } from './routes/TripHomeRoute'
+import { SettlementResultRoute } from './routes/SettlementResultRoute'
 import LoginPage from '../pages/auth/LoginPage'
 import SignupPage from '../pages/auth/SignupPage'
 import TripsPage from '../pages/trips/TripsPage'
@@ -40,6 +41,7 @@ function AppRoutes() {
       <Route path="/trips/:tripId/members" element={<TripMembersPage />} />
       <Route path="/trips/:tripId/receipts/new" element={<ReceiptNewPage />} />
       <Route path="/trips/:tripId/receipts/:receiptId" element={<ReceiptDetailPage />} />
+      <Route path="/trips/:tripId/settlement" element={<SettlementResultRoute />} />
       <Route path="/invite/:inviteCode" element={<InvitedTripPage />} />
       <Route
         path="/receipts/:receiptId/split"
@@ -53,6 +55,8 @@ function AppRoutes() {
             onCloseRemainder={receiptSplit.handleCloseRemainder}
             onOpenRemainder={receiptSplit.handleOpenRemainder}
             onUpdateItem={receiptSplit.handleUpdateItem}
+            onAddAdditionalCost={receiptSplit.handleAddAdditionalCost}
+            onDeleteAdditionalCost={receiptSplit.handleDeleteAdditionalCost}
           />
         }
       />

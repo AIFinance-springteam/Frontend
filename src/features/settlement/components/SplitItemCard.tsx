@@ -13,6 +13,7 @@ type SplitItemCardProps = {
   onCloseRemainder: () => void
   onOpenRemainder: () => void
   onUpdate: (updater: (item: SplitItem) => SplitItem) => void
+  onDelete?: () => void
 }
 
 export function SplitItemCard({
@@ -22,6 +23,7 @@ export function SplitItemCard({
   onCloseRemainder,
   onOpenRemainder,
   onUpdate,
+  onDelete,
 }: SplitItemCardProps) {
   const selectedCount = item.selectedIds.length
   const perPersonAmount = selectedCount ? Math.floor(item.amount / selectedCount) : 0
@@ -67,7 +69,18 @@ export function SplitItemCard({
   return (
     <article className="relative rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
       <div className="mb-3.5 flex items-center justify-between gap-3">
-        <h2 className="truncate text-[15px] font-bold">{item.name}</h2>
+        <div className="flex min-w-0 items-center gap-2">
+          <h2 className="truncate text-[15px] font-bold">{item.name}</h2>
+          {item.additionalCost && onDelete ? (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="h-6 shrink-0 rounded-full border border-neutral-300 bg-white px-2.5 !text-[10px] font-bold leading-none text-neutral-500 active:bg-neutral-50"
+            >
+              삭제
+            </button>
+          ) : null}
+        </div>
         <strong className="shrink-0 text-[15px] font-bold">{formatWon(item.amount)}</strong>
       </div>
 

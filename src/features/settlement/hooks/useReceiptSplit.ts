@@ -13,6 +13,24 @@ export function useReceiptSplit(participants: Participant[]) {
     setSplitItems((items) => items.map((item) => (item.id === itemId ? updater(item) : item)))
   }
 
+  const handleAddAdditionalCost = (name: string, amount: number) => {
+    setSplitItems((items) => [
+      ...items,
+      {
+        id: `additional-cost-${Date.now()}`,
+        name,
+        amount,
+        additionalCost: true,
+        mode: 'equal',
+        selectedIds: [],
+      },
+    ])
+  }
+
+  const handleDeleteAdditionalCost = (itemId: string) => {
+    setSplitItems((items) => items.filter((item) => item.id !== itemId || !item.additionalCost))
+  }
+
   const handleApplyAllParticipants = () => {
     setSplitItems((items) =>
       items.map((item) => ({
@@ -36,5 +54,7 @@ export function useReceiptSplit(participants: Participant[]) {
     handleCloseRemainder,
     handleOpenRemainder: setOpenRemainderFor,
     handleUpdateItem,
+    handleAddAdditionalCost,
+    handleDeleteAdditionalCost,
   }
 }

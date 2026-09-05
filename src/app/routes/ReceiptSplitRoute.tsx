@@ -15,6 +15,8 @@ type ReceiptSplitRouteProps = {
   onCloseRemainder: () => void
   onOpenRemainder: (itemId: string) => void
   onUpdateItem: (itemId: string, updater: (item: SplitItem) => SplitItem) => void
+  onAddAdditionalCost: (name: string, amount: number) => void
+  onDeleteAdditionalCost: (itemId: string) => void
 }
 
 export function ReceiptSplitRoute({
@@ -26,6 +28,8 @@ export function ReceiptSplitRoute({
   onCloseRemainder,
   onOpenRemainder,
   onUpdateItem,
+  onAddAdditionalCost,
+  onDeleteAdditionalCost,
 }: ReceiptSplitRouteProps) {
   const navigate = useNavigate()
 
@@ -46,6 +50,9 @@ export function ReceiptSplitRoute({
         onCloseRemainder={onCloseRemainder}
         onOpenRemainder={onOpenRemainder}
         onUpdateItem={onUpdateItem}
+        onAddAdditionalCost={onAddAdditionalCost}
+        onDeleteAdditionalCost={onDeleteAdditionalCost}
+        onSave={() => navigate(routePaths.tripHome())}
       />
     </MobileShell>
   )
