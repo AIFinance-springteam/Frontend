@@ -6,6 +6,7 @@ import { ReceiptList, type Receipt } from '../../receipt/components/ReceiptList'
 import { NeedActionBox } from '../components/NeedActionBox'
 import { SettlementDeltaCard } from '../components/SettlementDeltaCard'
 import { TotalTripCostCard } from '../components/TotalTripCostCard'
+import { SettlementCloseCard } from '../../settlement/components/SettlementCloseCard'
 
 type TripHomePageProps = {
   participants: Participant[]
@@ -13,6 +14,8 @@ type TripHomePageProps = {
   unassignedCount: number
   onNeedActionClick: () => void
   onReceiptClick: (receiptId: string) => void
+  isOwner: boolean
+  onSettlementConfirm: () => void
 }
 
 export function TripHomePage({
@@ -21,6 +24,8 @@ export function TripHomePage({
   unassignedCount,
   onNeedActionClick,
   onReceiptClick,
+  isOwner,
+  onSettlementConfirm,
 }: TripHomePageProps) {
   return (
     <div className="flex min-h-[calc(100vh-56px)] flex-col bg-neutral-50">
@@ -35,6 +40,11 @@ export function TripHomePage({
         <SettlementDeltaCard balanceDelta={135000} paidAmount={240000} owedAmount={105000} />
         <TotalTripCostCard totalAmount={394000} />
         <NeedActionBox unassignedCount={unassignedCount} duplicateCount={1} onUnassignedClick={onNeedActionClick} />
+        <SettlementCloseCard
+          unassignedCount={unassignedCount}
+          isOwner={isOwner}
+          onConfirm={onSettlementConfirm}
+        />
         <ReceiptList receipts={receipts} onUnassignedReceiptClick={onReceiptClick} />
       </div>
 

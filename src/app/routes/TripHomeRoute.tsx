@@ -21,6 +21,8 @@ export function TripHomeRoute({ unassignedCount }: TripHomeRouteProps) {
         unassignedCount={unassignedCount}
         onNeedActionClick={() => navigate(routePaths.receiptSplit())}
         onReceiptClick={(receiptId) => navigate(routePaths.receiptSplit(receiptId))}
+        isOwner
+        onSettlementConfirm={() => navigate(routePaths.settlementResult())}
       />
     </MobileShell>
   )
