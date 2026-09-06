@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import ReportPage from "../features/report/pages/ReportPage";
 import LoginPage from "../pages/auth/LoginPage";
 import SignupPage from "../pages/auth/SignupPage";
 import TripsPage from "../pages/trips/TripsPage";
@@ -24,6 +25,7 @@ export function AppRouter() {
         <Route path="/trips/:tripId/receipts/new" element={<ReceiptNewPage />} />
         <Route path="/trips/:tripId/receipts/:receiptId" element={<ReceiptDetailPage />} />
         <Route path="/trips/:tripId/receipts/:receiptId/split" element={<ReceiptSplitRoute />} />
+        <Route path="/trips/:tripId/report" element={<ReportPage />} />
         <Route path="/trips/:tripId/settlement" element={<SettlementResultRoute />} />
         <Route path="/invite/:inviteCode" element={<InvitedTripPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
