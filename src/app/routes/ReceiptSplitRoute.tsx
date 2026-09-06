@@ -1,59 +1,35 @@
-import { useNavigate } from 'react-router-dom'
-import { ReceiptSplitPage } from '../../features/settlement/pages/ReceiptSplitPage'
-import type { SplitItem } from '../../features/settlement/types/settlement'
-import { tripParticipants } from '../../features/trip/mocks/tripMockData'
-import { MobileHeader } from '../../shared/components/MobileHeader'
-import { MobileShell } from '../../shared/components/MobileShell'
-import { routePaths } from './routePaths'
+import { useNavigate, useParams } from "react-router-dom";
+import { useReceiptSplit } from "../../features/settlement/hooks/useReceiptSplit";
+import { ReceiptSplitPage } from "../../features/settlement/pages/ReceiptSplitPage";
+import { useTripInfo } from "../../features/trip/hooks/useTripInfo";
+import { MobileHeader } from "../../shared/components/MobileHeader";
+import { MobileShell } from "../../shared/components/MobileShell";
+import { routePaths } from "./routePaths";
 
-type ReceiptSplitRouteProps = {
-  items: SplitItem[]
-  openRemainderFor: string | null
-  unassignedCount: number
-  onApplyAll: () => void
-  onBack: () => void
-  onCloseRemainder: () => void
-  onOpenRemainder: (itemId: string) => void
-  onUpdateItem: (itemId: string, updater: (item: SplitItem) => SplitItem) => void
-  onAddAdditionalCost: (name: string, amount: number) => void
-  onDeleteAdditionalCost: (itemId: string) => void
-}
-
-export function ReceiptSplitRoute({
-  items,
-  openRemainderFor,
-  unassignedCount,
-  onApplyAll,
-  onBack,
-  onCloseRemainder,
-  onOpenRemainder,
-  onUpdateItem,
-  onAddAdditionalCost,
-  onDeleteAdditionalCost,
-}: ReceiptSplitRouteProps) {
-  const navigate = useNavigate()
-
-  const handleBack = () => {
-    onBack()
-    navigate(routePaths.tripHome())
-  }
+export function ReceiptSplitRoute() {
+  const { tripId = "", receiptId = "" } = useParams();
+  const navigate = useNavigate();
+  const split = useReceiptSplit(tripId, receiptId);
+  const tripInfo = useTripInfo(tripId);
 
   return (
     <MobileShell>
-      <MobileHeader title="비용 나누기" subtitle="CU 해운대점" onBack={handleBack} />
+      <MobileHeader title="비용 나누기" onBack={() => navigate(routePaths.tripHome(tripId))} />
       <ReceiptSplitPage
-        items={items}
-        participants={tripParticipants}
-        unassignedCount={unassignedCount}
-        openRemainderFor={openRemainderFor}
-        onApplyAll={onApplyAll}
-        onCloseRemainder={onCloseRemainder}
-        onOpenRemainder={onOpenRemainder}
-        onUpdateItem={onUpdateItem}
-        onAddAdditionalCost={onAddAdditionalCost}
-        onDeleteAdditionalCost={onDeleteAdditionalCost}
-        onSave={() => navigate(routePaths.tripHome())}
+        items={split.splitItems}
+        participants={tripInfo.participants}
+        unassignedCount={split.unassignedCount}
+        openRemainderFor={split.openRemainderFor}
+        onApplyAll={split.handleApplyAllParticipants}
+        onCloseRemainder={split.handleCloseRemainder}
+        onOpenRemainder={split.handleOpenRemainder}
+        onToggleParticipant={split.handleToggleParticipant}
+        onChangeMode={split.handleChangeMode}
+        onChangeRemainderPayer={split.handleChangeRemainderPayer}
+        onSubmitCustom={split.handleSubmitCustom}
+        onAddAdditionalCost={split.handleAddAdditionalCost}
+        onDeleteAdditionalCost={split.handleDeleteAdditionalCost}
       />
     </MobileShell>
-  )
+  );
 }
