@@ -4,11 +4,14 @@ import { routePaths } from "../../../app/routes/routePaths";
 import { Modal } from "../../../components/Modal";
 import { getReceiptDetail } from "../../../features/receipt/services/receiptService";
 import type { ReceiptDetail, ReceiptItem } from "../../../features/receipt/types/receipt";
-import { getMember, getTrip, getTripMembers } from "../../../mocks/tripData";
-import PayerChangeSheet from "./PayerChangeSheet";
 import "./ReceiptDetailPage.css";
 
 type Notice = { message: string; tone?: "default" | "danger" };
+type ReceiptLoadState = {
+  requestKey: string;
+  status: "loading" | "success" | "error";
+  receipt: ReceiptDetail | null;
+};
 
 const won = new Intl.NumberFormat("ko-KR", {
   style: "currency",
@@ -25,6 +28,7 @@ const dateTime = new Intl.DateTimeFormat("ko-KR", {
 });
 
 function formatDateTime(value: string) {
+  if (!value) return "-";
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? value : dateTime.format(parsed);
 }
@@ -75,11 +79,14 @@ function ReceiptDetailPage() {
     tripId: string;
     receiptId: string;
   }>();
-  const [receipt, setReceipt] = useState<ReceiptDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const requestKey = `${tripId}:${receiptId}`;
+  const [loadState, setLoadState] = useState<ReceiptLoadState>({
+    requestKey,
+    status: "loading",
+    receipt: null,
+  });
   const [infoOpen, setInfoOpen] = useState(false);
   const [itemsOpen, setItemsOpen] = useState(false);
-  const [payerSheetOpen, setPayerSheetOpen] = useState(false);
   const [draftInfo, setDraftInfo] = useState({ merchantName: "", paidAt: "", totalAmount: 0 });
   const [draftItems, setDraftItems] = useState<ReceiptItem[]>([]);
   const [duplicateChoice, setDuplicateChoice] = useState<"keep" | "cancel" | null>(null);
@@ -89,18 +96,15 @@ function ReceiptDetailPage() {
     let active = true;
     getReceiptDetail(tripId, receiptId)
       .then((data) => {
-        if (active) setReceipt(data);
+        if (active) setLoadState({ requestKey, status: "success", receipt: data });
       })
       .catch(() => {
-        if (active) setReceipt(null);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
+        if (active) setLoadState({ requestKey, status: "error", receipt: null });
       });
     return () => {
       active = false;
     };
-  }, [tripId, receiptId]);
+  }, [tripId, receiptId, requestKey]);
 
   useEffect(() => {
     if (!notice) return;
@@ -108,9 +112,12 @@ function ReceiptDetailPage() {
     return () => window.clearTimeout(timer);
   }, [notice]);
 
-  const itemTotal = useMemo(() => receipt?.items.reduce((sum, item) => sum + item.amount, 0) ?? 0, [receipt]);
+  const itemTotal = useMemo(
+    () => loadState.receipt?.items.reduce((sum, item) => sum + item.amount, 0) ?? 0,
+    [loadState.receipt],
+  );
 
-  if (loading)
+  if (loadState.requestKey !== requestKey || loadState.status === "loading")
     return (
       <div className="receipt-detail-page">
         <main className="state-page">
@@ -119,6 +126,16 @@ function ReceiptDetailPage() {
         </main>
       </div>
     );
+  if (loadState.status === "error")
+    return (
+      <div className="receipt-detail-page">
+        <main className="state-page">
+          <h1>영수증을 불러오지 못했어요.</h1>
+          <p>잠시 후 다시 시도해 주세요.</p>
+        </main>
+      </div>
+    );
+  const receipt = loadState.receipt;
   if (!receipt)
     return (
       <div className="receipt-detail-page">
@@ -140,7 +157,7 @@ function ReceiptDetailPage() {
 
   const saveInfo = (event: FormEvent) => {
     event.preventDefault();
-    setReceipt({ ...receipt, ...draftInfo });
+    setLoadState({ ...loadState, receipt: { ...receipt, ...draftInfo } });
     setInfoOpen(false);
     setNotice({ message: "영수증 정보를 화면에 반영했습니다." });
   };
@@ -169,7 +186,7 @@ function ReceiptDetailPage() {
       setNotice({ message: "상품명과 1개 이상의 수량을 입력해 주세요.", tone: "danger" });
       return;
     }
-    setReceipt({ ...receipt, items: draftItems });
+    setLoadState({ ...loadState, receipt: { ...receipt, items: draftItems } });
     setItemsOpen(false);
     setNotice({ message: "상품 목록을 화면에 반영했습니다." });
   };
@@ -178,24 +195,15 @@ function ReceiptDetailPage() {
     setNotice({ message, tone });
   };
 
-  const changePayer = (payerId: string) => {
-    const payer = getMember(payerId);
-    if (!payer) return;
-
-    setReceipt({ ...receipt, payerId, payerName: payer.name });
-    setPayerSheetOpen(false);
-    setNotice({ message: "결제자를 화면에 반영했습니다." });
-  };
-
   const totalMatches = receipt.items.length === 0 || itemTotal === receipt.totalAmount;
-  const trip = getTrip(receipt.tripId);
-  const tripMembers = trip ? getTripMembers(trip) : [];
   const analysisLabel =
     receipt.analysisStatus === "SUCCESS"
       ? "AI 분석 완료"
       : receipt.analysisStatus === "PROCESSING"
         ? "AI 분석 중"
-        : "AI 분석 실패";
+        : receipt.analysisStatus === "PENDING"
+          ? "AI 분석 대기"
+          : "AI 분석 실패";
 
   return (
     <div className="receipt-detail-page">
@@ -220,7 +228,11 @@ function ReceiptDetailPage() {
           </div>
         </div>
         <div className="header-actions">
-          <button className="button button-quiet" type="button" onClick={() => setPayerSheetOpen(true)}>
+          <button
+            className="button button-quiet"
+            type="button"
+            onClick={() => temporaryAction("결제자 변경 API 연결은 준비 중입니다.")}
+          >
             결제자 변경
           </button>
           <button
@@ -325,7 +337,7 @@ function ReceiptDetailPage() {
                 <span role="cell">{item.quantity}개</span>
                 <strong role="cell">{won.format(item.amount)}</strong>
                 <span role="cell" className={`confidence ${item.confidence.toLowerCase()}`}>
-                  {item.confidence === "LOW" ? "낮음" : "높음"}
+                  {item.confidence === "LOW" ? "낮음" : item.confidence === "HIGH" ? "높음" : "정보 없음"}
                 </span>
               </div>
             ))}
@@ -360,7 +372,7 @@ function ReceiptDetailPage() {
             <span>해당 없음</span>
           </section>
 
-          {receipt.duplicateStatus !== "CLEAR" && (
+          {receipt.duplicateStatus === "DUPLICATE" && (
             <section className="duplicate-card">
               <div className="duplicate-content">
                 <span className="duplicate-mark">?</span>
@@ -508,15 +520,6 @@ function ReceiptDetailPage() {
           </div>
         </form>
       </Modal>
-
-      {payerSheetOpen && tripMembers.length > 0 && (
-        <PayerChangeSheet
-          members={tripMembers}
-          currentPayerId={receipt.payerId}
-          onSelect={changePayer}
-          onClose={() => setPayerSheetOpen(false)}
-        />
-      )}
 
       {notice && (
         <div className={`toast ${notice.tone === "danger" ? "toast-danger" : ""}`} role="status">
