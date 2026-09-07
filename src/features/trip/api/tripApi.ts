@@ -11,6 +11,7 @@ export type TripDetailResult = {
 };
 
 export type TripMemberResult = {
+  tripMemberId: number;
   userId: number;
   nickname: string;
   role: "OWNER" | "MEMBER";

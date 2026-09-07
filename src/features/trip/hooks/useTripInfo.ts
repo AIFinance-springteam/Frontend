@@ -21,7 +21,7 @@ export function useTripInfo(tripId: string) {
     tripApi.getMembers(tripId).then((members) => {
       setParticipants(
         members.map((member) => ({
-          id: String(member.userId),
+          id: String(member.tripMemberId),
           name: member.nickname,
           avatar: member.nickname.charAt(0),
         })),
