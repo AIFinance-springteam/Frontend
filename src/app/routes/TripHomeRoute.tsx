@@ -6,6 +6,7 @@ import { TripHomePage } from "../../features/trip/pages/TripHomePage";
 import { MobileHeader } from "../../shared/components/MobileHeader";
 import { MobileShell } from "../../shared/components/MobileShell";
 import { routePaths } from "./routePaths";
+import * as settlementApi from "../../features/settlement/api/settlementApi";
 
 export function TripHomeRoute() {
   const { tripId = "" } = useParams();
@@ -26,10 +27,16 @@ export function TripHomeRoute() {
         owedAmount={dashboard.owedAmount}
         balanceDelta={dashboard.balanceDelta}
         dateRangeLabel={tripInfo.dateRangeLabel}
+        tripStatus={tripInfo.tripStatus}
         onNeedActionClick={() => {}}
         onReceiptClick={(receiptId) => navigate(routePaths.receiptSplit(tripId, receiptId))}
-        isOwner={false}
-        onSettlementConfirm={() => navigate(routePaths.settlementResult(tripId))}
+        isOwner={tripInfo.isOwner}
+        onSettlementCheck={() => settlementApi.checkSettlement(tripId)}
+        onSettlementConfirm={async () => {
+          await settlementApi.confirmSettlement(tripId);
+          navigate(routePaths.settlementResult(tripId));
+        }}
+        onSettlementResultClick={() => navigate(routePaths.settlementResult(tripId))}
       />
     </MobileShell>
   );

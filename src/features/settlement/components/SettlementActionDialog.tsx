@@ -3,6 +3,7 @@ type SettlementActionDialogProps = {
   description: string
   confirmLabel: string
   isDangerous?: boolean
+  isSubmitting?: boolean
   onCancel: () => void
   onConfirm: () => void
 }
@@ -12,6 +13,7 @@ export function SettlementActionDialog({
   description,
   confirmLabel,
   isDangerous = false,
+  isSubmitting = false,
   onCancel,
   onConfirm,
 }: SettlementActionDialogProps) {
@@ -39,6 +41,7 @@ export function SettlementActionDialog({
           <button
             type="button"
             onClick={onCancel}
+            disabled={isSubmitting}
             className="h-11 flex-1 rounded-xl border border-neutral-200 bg-white !text-[12px] font-bold text-neutral-600"
           >
             취소
@@ -46,11 +49,12 @@ export function SettlementActionDialog({
           <button
             type="button"
             onClick={onConfirm}
+            disabled={isSubmitting}
             className={`h-11 flex-1 rounded-xl !text-[12px] font-bold text-white ${
               isDangerous ? 'bg-rose-600 active:bg-rose-700' : 'bg-neutral-950 active:bg-neutral-800'
             }`}
           >
-            {confirmLabel}
+            {isSubmitting ? '처리 중…' : confirmLabel}
           </button>
         </div>
       </section>

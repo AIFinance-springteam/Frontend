@@ -5,11 +5,15 @@ export type TripDetailResult = {
   name: string;
   startDate: string;
   endDate: string;
+  status: "ACTIVE" | "SETTLING" | "COMPLETED";
+  ownerId: number;
+  ownerNickname: string;
 };
 
 export type TripMemberResult = {
-  tripMemberId: number;
+  userId: number;
   nickname: string;
+  role: "OWNER" | "MEMBER";
 };
 
 export async function getTripDetail(tripId: string) {

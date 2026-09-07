@@ -7,13 +7,16 @@ import { SettlementActionDialog } from '../components/SettlementActionDialog'
 
 type SettlementResultPageProps = {
   summary: SettlementSummary
-  onComplete: () => void
+  error: string | null
+  onMarkSent: (transferId: string) => Promise<void>
+  onConfirmTransfer: (transferId: string) => Promise<void>
+  onComplete: () => Promise<void>
 }
 
 const statusLabel: Record<TransferStatus, string> = {
   PENDING: '송금 전',
   SENT: '확인 필요',
-  CONFIRMED: '완료',
+  COMPLETED: '완료',
 }
 
 type PendingAction = {
@@ -24,27 +27,28 @@ type PendingAction = {
   confirmLabel: string
 }
 
-export function SettlementResultPage({ summary, onComplete }: SettlementResultPageProps) {
+export function SettlementResultPage({ summary, error, onMarkSent, onConfirmTransfer, onComplete }: SettlementResultPageProps) {
   const [showBreakdown, setShowBreakdown] = useState(false)
-  const [transfers, setTransfers] = useState<SettlementTransfer[]>(summary.transfers)
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const transfers = summary.transfers
   const completedCount = useMemo(
-    () => transfers.filter((transfer) => transfer.status === 'CONFIRMED').length,
+    () => transfers.filter((transfer) => transfer.status === 'COMPLETED').length,
     [transfers],
   )
   const allTransfersConfirmed = completedCount === transfers.length
 
-  const updateTransferStatus = (transferId: string, status: TransferStatus) => {
-    setTransfers((current) => current.map((transfer) => (
-      transfer.id === transferId ? { ...transfer, status } : transfer
-    )))
-  }
-
-  const confirmTransferAction = () => {
+  const confirmTransferAction = async () => {
     if (!pendingAction) return
-    updateTransferStatus(pendingAction.transferId, pendingAction.nextStatus)
-    setPendingAction(null)
+    setIsSubmitting(true)
+    try {
+      if (pendingAction.nextStatus === 'SENT') await onMarkSent(pendingAction.transferId)
+      if (pendingAction.nextStatus === 'COMPLETED') await onConfirmTransfer(pendingAction.transferId)
+      setPendingAction(null)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const renderTransferAction = (transfer: SettlementTransfer) => {
@@ -75,7 +79,7 @@ export function SettlementResultPage({ summary, onComplete }: SettlementResultPa
           type="button"
           onClick={() => setPendingAction({
             transferId: transfer.id,
-            nextStatus: 'CONFIRMED',
+            nextStatus: 'COMPLETED',
             title: '입금을 확인했나요?',
             description: `${transfer.senderName}님에게서 ${formatWon(transfer.amount)}이 입금됐는지 확인해 주세요.`,
             confirmLabel: '입금 확인',
@@ -95,7 +99,7 @@ export function SettlementResultPage({ summary, onComplete }: SettlementResultPa
       return <span className="text-[10px] font-medium text-neutral-400">송금 대기</span>
     }
 
-    if (transfer.status === 'CONFIRMED') {
+    if (transfer.status === 'COMPLETED') {
       return <span className="text-[10px] font-semibold text-emerald-700">확인 완료</span>
     }
 
@@ -105,6 +109,7 @@ export function SettlementResultPage({ summary, onComplete }: SettlementResultPa
   return (
     <div className="flex min-h-[calc(100vh-56px)] flex-col bg-neutral-50">
       <div className="flex flex-1 flex-col gap-4 px-5 py-5">
+        {error ? <div className="rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-[11px] text-rose-700">{error}</div> : null}
         <section className="rounded-2xl border border-neutral-200 bg-white p-5 text-center shadow-sm">
           <p className="text-xs font-semibold text-neutral-400">총 정산 금액</p>
           <strong className="mt-2 block text-[30px] font-black tracking-tight">
@@ -138,7 +143,7 @@ export function SettlementResultPage({ summary, onComplete }: SettlementResultPa
                 <div className="flex w-full items-center justify-between border-t border-neutral-100 pt-3">
                   <span
                     className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold ${
-                      transfer.status === 'CONFIRMED'
+                      transfer.status === 'COMPLETED'
                         ? 'bg-emerald-50 text-emerald-700'
                         : transfer.status === 'SENT'
                           ? 'bg-amber-50 text-amber-700'
@@ -188,7 +193,7 @@ export function SettlementResultPage({ summary, onComplete }: SettlementResultPa
         </section>
       </div>
 
-      {summary.currentUserIsOwner ? (
+      {summary.currentUserIsOwner && summary.status !== 'COMPLETED' ? (
         <BottomActionBar helperText={allTransfersConfirmed ? '모든 입금 확인이 완료되었습니다' : '모든 입금 확인 후 정산을 종료할 수 있습니다'}>
           <PrimaryButton
             type="button"
@@ -205,6 +210,7 @@ export function SettlementResultPage({ summary, onComplete }: SettlementResultPa
           title={pendingAction.title}
           description={pendingAction.description}
           confirmLabel={pendingAction.confirmLabel}
+          isSubmitting={isSubmitting}
           onCancel={() => setPendingAction(null)}
           onConfirm={confirmTransferAction}
         />
@@ -216,8 +222,17 @@ export function SettlementResultPage({ summary, onComplete }: SettlementResultPa
           description="모든 송금과 입금 확인이 완료되었습니다. 종료한 정산은 다시 진행 상태로 되돌릴 수 없습니다."
           confirmLabel="정산 종료"
           isDangerous
+          isSubmitting={isSubmitting}
           onCancel={() => setIsCompleteDialogOpen(false)}
-          onConfirm={onComplete}
+          onConfirm={async () => {
+            setIsSubmitting(true)
+            try {
+              await onComplete()
+              setIsCompleteDialogOpen(false)
+            } finally {
+              setIsSubmitting(false)
+            }
+          }}
         />
       ) : null}
     </div>

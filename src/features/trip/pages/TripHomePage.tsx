@@ -7,6 +7,7 @@ import { NeedActionBox } from "../components/NeedActionBox";
 import { SettlementDeltaCard } from "../components/SettlementDeltaCard";
 import { TotalTripCostCard } from "../components/TotalTripCostCard";
 import { SettlementCloseCard } from "../../settlement/components/SettlementCloseCard";
+import type { SettlementCheckResult } from "../../settlement/api/settlementApi";
 
 type TripHomePageProps = {
   participants: Participant[];
@@ -17,10 +18,13 @@ type TripHomePageProps = {
   owedAmount: number;
   balanceDelta: number;
   dateRangeLabel: string;
+  tripStatus: "ACTIVE" | "SETTLING" | "COMPLETED";
   onNeedActionClick: () => void;
   onReceiptClick: (receiptId: string) => void;
   isOwner: boolean;
-  onSettlementConfirm: () => void;
+  onSettlementCheck: () => Promise<SettlementCheckResult>;
+  onSettlementConfirm: () => Promise<void>;
+  onSettlementResultClick: () => void;
 };
 
 export function TripHomePage({
@@ -32,10 +36,13 @@ export function TripHomePage({
   owedAmount,
   balanceDelta,
   dateRangeLabel,
+  tripStatus,
   onNeedActionClick,
   onReceiptClick,
   isOwner,
+  onSettlementCheck,
   onSettlementConfirm,
+  onSettlementResultClick,
 }: TripHomePageProps) {
   const duplicateCount = 0;
 
@@ -60,7 +67,21 @@ export function TripHomePage({
           />
         )}
 
-        <SettlementCloseCard unassignedCount={unassignedCount} isOwner={isOwner} onConfirm={onSettlementConfirm} />
+        {tripStatus === "ACTIVE" ? (
+          <SettlementCloseCard
+            isOwner={isOwner}
+            onCheck={onSettlementCheck}
+            onConfirm={onSettlementConfirm}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={onSettlementResultClick}
+            className="h-12 rounded-xl bg-neutral-950 !text-[13px] font-bold text-white"
+          >
+            {tripStatus === "COMPLETED" ? "완료된 정산 보기" : "정산 현황 보기"}
+          </button>
+        )}
         <ReceiptList receipts={receipts} onUnassignedReceiptClick={onReceiptClick} />
       </div>
 

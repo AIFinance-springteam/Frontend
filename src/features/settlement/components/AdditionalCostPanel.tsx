@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 
 type AdditionalCostPanelProps = {
-  onAdd: (name: string, amount: number) => void
+  onAdd: (name: string, amount: number) => Promise<void>
   children?: ReactNode
 }
 
@@ -9,16 +9,26 @@ export function AdditionalCostPanel({ onAdd, children }: AdditionalCostPanelProp
   const [isAdding, setIsAdding] = useState(false)
   const [name, setName] = useState('')
   const [amount, setAmount] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleAdd = (event: FormEvent<HTMLFormElement>) => {
+  const handleAdd = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const parsedAmount = Number(amount)
     if (!name.trim() || parsedAmount <= 0) return
 
-    onAdd(name.trim(), parsedAmount)
-    setName('')
-    setAmount('')
-    setIsAdding(false)
+    setIsSubmitting(true)
+    setError(null)
+    try {
+      await onAdd(name.trim(), parsedAmount)
+      setName('')
+      setAmount('')
+      setIsAdding(false)
+    } catch (caught) {
+      setError((caught as { message?: string }).message ?? '추가 비용을 등록하지 못했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -68,8 +78,9 @@ export function AdditionalCostPanel({ onAdd, children }: AdditionalCostPanelProp
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400">원</span>
             </label>
           </div>
-          <button type="submit" className="mt-2 h-9 w-full rounded-lg bg-neutral-900 text-[11px] font-bold text-white">
-            추가하기
+          {error ? <p className="mt-2 text-[10px] text-rose-600">{error}</p> : null}
+          <button disabled={isSubmitting} type="submit" className="mt-2 h-9 w-full rounded-lg bg-neutral-900 text-[11px] font-bold text-white disabled:bg-neutral-300">
+            {isSubmitting ? '추가 중…' : '추가하기'}
           </button>
         </form>
       ) : null}
