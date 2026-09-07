@@ -15,7 +15,7 @@ export type CustomShare = {
   amount: number;
 };
 
-export type TransferStatus = "PENDING" | "SENT" | "CONFIRMED";
+export type TransferStatus = "PENDING" | "SENT" | "COMPLETED";
 
 export type SettlementTransfer = {
   id: string;
@@ -39,6 +39,7 @@ export type SettlementSummary = {
   tripName: string;
   currentUserId: string;
   currentUserIsOwner: boolean;
+  status: "CONFIRMED" | "COMPLETED";
   totalAmount: number;
   transferCount: number;
   myBalance: number;

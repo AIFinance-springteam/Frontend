@@ -19,6 +19,9 @@ export function ReceiptSplitRoute() {
         items={split.splitItems}
         participants={tripInfo.participants}
         unassignedCount={split.unassignedCount}
+        isLoading={split.isLoading}
+        isMutating={split.isMutating}
+        error={split.error}
         openRemainderFor={split.openRemainderFor}
         onApplyAll={split.handleApplyAllParticipants}
         onCloseRemainder={split.handleCloseRemainder}
@@ -29,6 +32,7 @@ export function ReceiptSplitRoute() {
         onSubmitCustom={split.handleSubmitCustom}
         onAddAdditionalCost={split.handleAddAdditionalCost}
         onDeleteAdditionalCost={split.handleDeleteAdditionalCost}
+        onSave={() => navigate(routePaths.tripHome(tripId))}
       />
     </MobileShell>
   );

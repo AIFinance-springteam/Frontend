@@ -24,6 +24,7 @@ export const settlementSummaryMock: SettlementSummary = {
   tripName: '부산 2박 3일',
   currentUserId: 'yu',
   currentUserIsOwner: true,
+  status: 'CONFIRMED',
   totalAmount: 394000,
   transferCount: 3,
   myBalance: 18000,
@@ -53,7 +54,7 @@ export const settlementSummaryMock: SettlementSummary = {
       receiverMemberId: 'yu',
       receiverName: '유진',
       amount: 65000,
-      status: 'CONFIRMED',
+      status: 'COMPLETED',
     },
   ],
   members: [

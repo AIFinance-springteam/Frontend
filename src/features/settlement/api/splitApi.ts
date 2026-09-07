@@ -4,6 +4,8 @@ export type ReceiptDetailItem = {
   itemId: number;
   itemName: string;
   originalAmount: number;
+  settlementAmount: number;
+  additionalCost: boolean;
 };
 
 export type ItemParticipantsResult = {
@@ -70,9 +72,16 @@ export async function splitCustom(
 }
 
 export async function addAdditionalCost(tripId: string, receiptId: string, itemName: string, amount: number) {
-  const { data } = await httpClient.post<{ itemId: number; itemName: string; originalAmount: number }>(
+  const { data } = await httpClient.post<{
+    itemId: number;
+    receiptId: number;
+    itemName: string;
+    quantity: number;
+    originalAmount: number;
+    settlementAmount: number;
+  }>(
     `/api/v1/trips/${tripId}/receipts/${receiptId}/items`,
-    { itemName, originalAmount: amount },
+    { itemName, amount },
   );
   return data;
 }

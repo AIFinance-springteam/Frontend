@@ -6,22 +6,29 @@ import type { ItemParticipantsResult } from "../api/splitApi";
 export function useReceiptSplit(tripId: string, receiptId: string) {
   const [splitItems, setSplitItems] = useState<SplitItem[]>([]);
   const [openRemainderFor, setOpenRemainderFor] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMutating, setIsMutating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    splitApi.fetchReceiptItems(tripId, receiptId).then((items) => {
-      setSplitItems(
-        items.map((item) => ({
-          id: String(item.itemId),
-          name: item.itemName,
-          amount: item.originalAmount,
-          mode: "equal" as SplitMode,
-          selectedIds: [],
-        })),
-      );
-    });
+    splitApi.fetchReceiptItems(tripId, receiptId)
+      .then((items) => {
+        setSplitItems(
+          items.map((item) => ({
+            id: String(item.itemId),
+            name: item.itemName,
+            amount: item.settlementAmount,
+            additionalCost: item.additionalCost,
+            mode: "equal" as SplitMode,
+            selectedIds: [],
+          })),
+        );
+      })
+      .catch((caught) => setError((caught as { message?: string }).message ?? "상품을 불러오지 못했습니다."))
+      .finally(() => setIsLoading(false));
   }, [tripId, receiptId]);
 
-  const unassignedCount = splitItems.filter((item) => !item.additionalCost && item.selectedIds.length === 0).length;
+  const unassignedCount = splitItems.filter((item) => item.selectedIds.length === 0).length;
 
   const applyResult = (itemId: string, result: ItemParticipantsResult, mode: SplitMode, remainderPayerId?: string) => {
     setSplitItems((items) =>
@@ -88,7 +95,7 @@ export function useReceiptSplit(tripId: string, receiptId: string) {
   };
 
   const handleApplyAllParticipants = async () => {
-    for (const item of splitItems.filter((i) => !i.additionalCost)) {
+    for (const item of splitItems) {
       await splitApi.selectAllParticipants(tripId, receiptId, Number(item.id));
       const result = await splitApi.splitEqual(tripId, receiptId, Number(item.id));
       applyResult(item.id, result, "equal");
@@ -96,27 +103,47 @@ export function useReceiptSplit(tripId: string, receiptId: string) {
   };
 
   const handleAddAdditionalCost = async (name: string, amount: number) => {
-    const item = await splitApi.addAdditionalCost(tripId, receiptId, name, amount);
-    setSplitItems((items) => [
-      ...items,
-      {
-        id: String(item.itemId),
-        name: item.itemName,
-        amount: item.originalAmount,
-        additionalCost: true,
-        mode: "equal",
-        selectedIds: [],
-      },
-    ]);
+    setIsMutating(true);
+    setError(null);
+    try {
+      const item = await splitApi.addAdditionalCost(tripId, receiptId, name, amount);
+      setSplitItems((items) => [
+        ...items,
+        {
+          id: String(item.itemId),
+          name: item.itemName,
+          amount: item.settlementAmount,
+          additionalCost: true,
+          mode: "equal",
+          selectedIds: [],
+        },
+      ]);
+    } catch (caught) {
+      setError((caught as { message?: string }).message ?? "추가 비용을 등록하지 못했습니다.");
+      throw caught;
+    } finally {
+      setIsMutating(false);
+    }
   };
 
   const handleDeleteAdditionalCost = async (itemId: string) => {
-    await splitApi.deleteAdditionalCost(tripId, receiptId, Number(itemId));
-    setSplitItems((items) => items.filter((item) => item.id !== itemId));
+    setIsMutating(true);
+    setError(null);
+    try {
+      await splitApi.deleteAdditionalCost(tripId, receiptId, Number(itemId));
+      setSplitItems((items) => items.filter((item) => item.id !== itemId));
+    } catch (caught) {
+      setError((caught as { message?: string }).message ?? "추가 비용을 삭제하지 못했습니다.");
+    } finally {
+      setIsMutating(false);
+    }
   };
 
   return {
     splitItems,
+    isLoading,
+    isMutating,
+    error,
     unassignedCount,
     openRemainderFor,
     handleApplyAllParticipants,

@@ -1,18 +1,47 @@
 import { useState } from 'react'
+import type { SettlementCheckResult } from '../api/settlementApi'
 
 type SettlementCloseCardProps = {
-  unassignedCount: number
   isOwner: boolean
-  onConfirm: () => void
+  onCheck: () => Promise<SettlementCheckResult>
+  onConfirm: () => Promise<void>
 }
 
 export function SettlementCloseCard({
-  unassignedCount,
   isOwner,
+  onCheck,
   onConfirm,
 }: SettlementCloseCardProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const canClose = unassignedCount === 0
+  const [checkResult, setCheckResult] = useState<SettlementCheckResult | null>(null)
+  const [isChecking, setIsChecking] = useState(false)
+  const [isConfirming, setIsConfirming] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const canClose = checkResult?.readyToConfirm === true
+
+  const handleCheck = async () => {
+    setIsOpen(true)
+    setIsChecking(true)
+    setError(null)
+    try {
+      setCheckResult(await onCheck())
+    } catch (caught) {
+      setError((caught as { message?: string }).message ?? '정산 상태를 확인하지 못했습니다.')
+    } finally {
+      setIsChecking(false)
+    }
+  }
+
+  const handleConfirm = async () => {
+    setIsConfirming(true)
+    setError(null)
+    try {
+      await onConfirm()
+    } catch (caught) {
+      setError((caught as { message?: string }).message ?? '정산을 확정하지 못했습니다.')
+      setIsConfirming(false)
+    }
+  }
 
   if (!isOwner) return null
 
@@ -32,7 +61,7 @@ export function SettlementCloseCard({
         </div>
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
+          onClick={handleCheck}
           className="mt-4 h-10 w-full rounded-xl border border-neutral-900 bg-white !text-[12px] font-bold text-neutral-900 active:bg-neutral-50"
         >
           정산 마감 점검
@@ -55,10 +84,12 @@ export function SettlementCloseCard({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 id="settlement-close-title" className="text-[17px] font-bold">
-                  {canClose ? '정산을 마감할까요?' : '아직 정산을 마감할 수 없어요'}
+                  {isChecking ? '정산 상태를 확인하고 있어요' : canClose ? '정산을 마감할까요?' : '아직 정산을 마감할 수 없어요'}
                 </h2>
                 <p className="mt-2 text-[12px] leading-5 text-neutral-500">
-                  {canClose
+                  {isChecking
+                    ? '잠시만 기다려 주세요.'
+                    : canClose
                     ? '확정하면 현재 비용 분담을 기준으로 송금 내역이 생성됩니다.'
                     : '마감 전에 아래 항목을 먼저 처리해 주세요.'}
                 </p>
@@ -73,7 +104,13 @@ export function SettlementCloseCard({
               </button>
             </div>
 
-            {canClose ? (
+            {error ? (
+              <div className="mt-4 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-[11px] text-rose-700">
+                {error}
+              </div>
+            ) : isChecking ? (
+              <div className="mt-4 rounded-xl bg-neutral-50 p-4 text-[11px] text-neutral-500">점검 중…</div>
+            ) : canClose ? (
               <div className="mt-4 rounded-xl bg-neutral-50 p-4">
                 <strong className="block text-[12px]">확정 전 확인</strong>
                 <ul className="mt-2 space-y-1.5 pl-4 text-[11px] leading-4 text-neutral-500">
@@ -82,9 +119,16 @@ export function SettlementCloseCard({
                 </ul>
               </div>
             ) : (
-              <div className="mt-4 flex items-center justify-between rounded-xl border border-rose-100 bg-rose-50 px-4 py-3">
-                <span className="text-[12px] font-semibold text-rose-700">부담자 미지정</span>
-                <strong className="text-[12px] text-rose-700">{unassignedCount}건</strong>
+              <div className="mt-4 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-semibold text-rose-700">확인 필요</span>
+                  <strong className="text-[12px] text-rose-700">{checkResult?.summary.issueCount ?? 0}건</strong>
+                </div>
+                {checkResult?.issues.map((issue, index) => (
+                  <p key={`${issue.type}-${issue.receiptId}-${issue.itemId}-${index}`} className="mt-2 text-[10px] leading-4 text-rose-700">
+                    · {issue.message}
+                  </p>
+                ))}
               </div>
             )}
 
@@ -99,10 +143,11 @@ export function SettlementCloseCard({
               {canClose ? (
                 <button
                   type="button"
-                  onClick={onConfirm}
+                  onClick={handleConfirm}
+                  disabled={isConfirming}
                   className="h-11 flex-1 rounded-xl bg-neutral-950 !text-[12px] font-bold text-white active:bg-neutral-800"
                 >
-                  정산 확정
+                  {isConfirming ? '확정 중…' : '정산 확정'}
                 </button>
               ) : null}
             </div>
