@@ -69,7 +69,7 @@ export const receipts: Receipt[] = [
     items: [],
     assigned: true,
     analysisStatus: "SUCCESS",
-    duplicateStatus: "CLEAR",
+    duplicateStatus: "UNIQUE",
     imageUrl: null,
   },
   {
@@ -82,7 +82,7 @@ export const receipts: Receipt[] = [
     items: [],
     assigned: true,
     analysisStatus: "SUCCESS",
-    duplicateStatus: "CLEAR",
+    duplicateStatus: "UNIQUE",
     imageUrl: null,
   },
   {
